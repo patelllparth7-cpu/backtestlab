@@ -102,9 +102,9 @@ const [selectedTrade, setSelectedTrade] =
 useEffect(() => {
   fetchTrades();
 
-  if (localStorage.getItem('backtestlab-unlocked') === 'true') {
-  setIsUnlocked(true);
-}
+  //if (localStorage.getItem('backtestlab-unlocked') === 'true') {
+  //setIsUnlocked(true);
+//}
 
   const channel = supabase
     .channel('trades-realtime')
