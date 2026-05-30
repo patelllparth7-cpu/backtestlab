@@ -94,10 +94,17 @@ const [galleryFilter, setGalleryFilter] =
   const [strategyA, setStrategyA] = useState('');
 const [strategyB, setStrategyB] = useState('');
 
+const [password, setPassword] = useState('');
+const [isUnlocked, setIsUnlocked] = useState(false);
+
 const [selectedTrade, setSelectedTrade] =
   useState<any>(null);
 useEffect(() => {
   fetchTrades();
+
+  if (localStorage.getItem('backtestlab-unlocked') === 'true') {
+  setIsUnlocked(true);
+}
 
   const channel = supabase
     .channel('trades-realtime')
@@ -572,6 +579,50 @@ const getStrategyMetrics = (strategyName: string) => {
 
 const compareA = getStrategyMetrics(strategyA);
 const compareB = getStrategyMetrics(strategyB);
+
+if (!isUnlocked) {
+  return (
+    <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] p-8">
+        <h1 className="text-3xl font-bold">
+          BacktestLab
+        </h1>
+
+        <p className="text-gray-400 mt-2">
+          Enter admin password to access dashboard.
+        </p>
+
+        <Input
+          type="password"
+          placeholder="Admin password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mt-6"
+        />
+
+        <Button
+          className="w-full mt-4 bg-blue-600 hover:bg-blue-500"
+          onClick={() => {
+            if (
+              password ===
+              process.env.NEXT_PUBLIC_ADMIN_PASSWORD
+            ) {
+              setIsUnlocked(true);
+              localStorage.setItem(
+                'backtestlab-unlocked',
+                'true'
+              );
+            } else {
+              alert('Wrong password');
+            }
+          }}
+        >
+          Unlock Dashboard
+        </Button>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white flex">
