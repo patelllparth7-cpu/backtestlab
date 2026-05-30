@@ -5,15 +5,7 @@
 
 import { supabase } from '@/lib/supabase';
 
-import { Calendar } from '@/components/ui/calendar';
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-
-import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 
 import {
@@ -251,9 +243,7 @@ const avgRR =
   return days[date.getDay()];
 };
 
-const [date, setDate] = useState<Date | undefined>(
-  new Date()
-);
+
 const dayStats = filteredTrades.reduce((acc: any, trade: any) => {
   if (!trade.day) return acc;
 
