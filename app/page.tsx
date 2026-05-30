@@ -106,6 +106,12 @@ useEffect(() => {
   //setIsUnlocked(true);
 //}
 
+if (
+  sessionStorage.getItem('backtestlab-unlocked') === 'true'
+) {
+  setIsUnlocked(true);
+}
+
   const channel = supabase
     .channel('trades-realtime')
     .on(
@@ -608,10 +614,10 @@ if (!isUnlocked) {
               process.env.NEXT_PUBLIC_ADMIN_PASSWORD
             ) {
               setIsUnlocked(true);
-              localStorage.setItem(
-                'backtestlab-unlocked',
-                'true'
-              );
+              sessionStorage.setItem(
+  'backtestlab-unlocked',
+  'true'
+);
             } else {
               alert('Wrong password');
             }
