@@ -70,6 +70,7 @@ exitTime: '',
 session: 'Indian Session',
 direction: 'LONG',
 tradeDate: '',
+trend: 'Uptrend',
 });
 
 const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
@@ -96,6 +97,7 @@ const [strategyB, setStrategyB] = useState('');
 
 const [password, setPassword] = useState('');
 const [isUnlocked, setIsUnlocked] = useState(false);
+const [activePage, setActivePage] = useState('Dashboard');
 
 const [selectedTrade, setSelectedTrade] =
   useState<any>(null);
@@ -586,6 +588,30 @@ const getStrategyMetrics = (strategyName: string) => {
 const compareA = getStrategyMetrics(strategyA);
 const compareB = getStrategyMetrics(strategyB);
 
+const trendTable = Object.entries(
+  filteredTrades.reduce((acc: any, trade: any) => {
+    if (!trade.trend) return acc;
+
+    if (!acc[trade.trend]) {
+      acc[trade.trend] = {
+        trades: 0,
+        wins: 0,
+        netRR: 0,
+      };
+    }
+
+    acc[trade.trend].trades++;
+
+    if (trade.result === 'WIN') {
+      acc[trade.trend].wins++;
+    }
+
+    acc[trade.trend].netRR += parseFloat(trade.rr || '0');
+
+    return acc;
+  }, {})
+);
+
 if (!isUnlocked) {
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center p-6">
@@ -644,24 +670,26 @@ if (!isUnlocked) {
         </div>
 
         <nav className="mt-10 space-y-2">
-          {[
-            'Dashboard',
-            'Trades',
-            'Analytics',
-            'Strategies',
-            'Calendar',
-            'Workspace',
-            'Settings',
-          ].map((item) => (
-            <button
-              key={item}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/10"
-            >
-              {item}
-              <ArrowUpRight size={16} className="text-gray-500" />
-            </button>
-          ))}
-        </nav>
+  {[
+    'Dashboard',
+    'Trades',
+    'Analytics',
+    'Gallery',
+    'Settings',
+  ].map((item) => (
+    <button
+      key={item}
+      onClick={() => setActivePage(item)}
+      className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/10"
+    >
+      {item}
+      <ArrowUpRight
+        size={16}
+        className="text-gray-500"
+      />
+    </button>
+  ))}
+</nav>
 
         <div className="mt-auto rounded-3xl bg-gradient-to-br from-blue-500/20 to-cyan-500/10 border border-blue-500/20 p-5">
           <p className="text-blue-300 text-sm">Current Performance</p>
@@ -938,6 +966,21 @@ if (!isUnlocked) {
 
 <select
   className="w-full rounded-xl bg-[#0B0F19] border border-white/10 px-3 py-2 text-sm"
+  value={tradeData.trend}
+  onChange={(e) =>
+    setTradeData({
+      ...tradeData,
+      trend: e.target.value,
+    })
+  }
+>
+  <option value="Uptrend">Uptrend</option>
+  <option value="Downtrend">Downtrend</option>
+  <option value="Sideways">Sideways</option>
+</select>
+
+<select
+  className="w-full rounded-xl bg-[#0B0F19] border border-white/10 px-3 py-2 text-sm"
   value={tradeData.direction}
   onChange={(e) =>
     setTradeData({
@@ -1098,6 +1141,7 @@ if (screenshotFile) {
   day: getDayFromDate(tradeData.tradeDate),
   
   screenshot_url: screenshotUrl,
+  trend: tradeData.trend,
 };
 
   const { error } = editingTrade
@@ -1131,6 +1175,7 @@ await fetchTrades();
   session: 'Indian Session',
 direction: 'LONG',
   tradeDate: '',
+  trend: 'Uptrend',
 });
 setScreenshotFile(null);
 setEditingTrade(null);
@@ -1214,6 +1259,9 @@ setEditingTrade(null);
     </div>
   </div>
 </div>
+
+          {activePage === 'Dashboard' && (
+  <>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mt-10">
@@ -1424,6 +1472,10 @@ setEditingTrade(null);
           </div>
         </div>
 
+          </>
+)}
+
+        
         {/* Trades Table */}
         <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 overflow-hidden">
           <div className="flex items-center justify-between">
@@ -1514,6 +1566,8 @@ setEditingTrade(null);
     session: trade.session || 'Indian Session',
     direction: trade.direction || 'LONG',
     tradeDate: trade.trade_date || '',
+    trend: trade.trend || 'Uptrend',
+  
   });
 
   setOpen(true);
@@ -1556,6 +1610,8 @@ setEditingTrade(null);
                 ))}
               </tbody>
             </table>
+          
+        
 
  <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
   <h3 className="text-2xl font-semibold">
@@ -1597,6 +1653,7 @@ setEditingTrade(null);
     </table>
   </div>
 </div>
+
 
 <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
   <h3 className="text-2xl font-semibold">
@@ -1722,6 +1779,46 @@ setEditingTrade(null);
             <td className="py-4">
               {stats.netRR.toFixed(2)}R
             </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Trend-wise Analytics
+  </h3>
+
+  <p className="text-gray-400 text-sm mt-1">
+  Use the Strategy filter above to see how one strategy performs in Uptrend, Downtrend, and Sideways markets.
+</p>
+
+
+  <div className="overflow-x-auto mt-6">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="text-left text-gray-400 border-b border-white/10">
+          <th className="pb-4">Trend</th>
+          <th className="pb-4">Trades</th>
+          <th className="pb-4">WR</th>
+          <th className="pb-4">Net RR</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {trendTable.map(([trend, stats]: any) => (
+          <tr
+            key={trend}
+            className="border-b border-white/5"
+          >
+            <td className="py-4">{trend}</td>
+            <td className="py-4">{stats.trades}</td>
+            <td className="py-4">
+              {Math.round((stats.wins / stats.trades) * 100)}%
+            </td>
+            <td className="py-4">{stats.netRR.toFixed(2)}R</td>
           </tr>
         ))}
       </tbody>
