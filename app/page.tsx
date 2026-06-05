@@ -102,10 +102,23 @@ const [password, setPassword] = useState('');
 const [isUnlocked, setIsUnlocked] = useState(false);
 const [activePage, setActivePage] = useState('Dashboard');
 
+const [profiles, setProfiles] = useState<any[]>([]);
+const [selectedProfile, setSelectedProfile] = useState<any>(null);
+
 const [selectedTrade, setSelectedTrade] =
   useState<any>(null);
 useEffect(() => {
   fetchTrades();
+  fetchProfiles();
+
+  const savedProfile =
+  sessionStorage.getItem('backtestlab-profile');
+
+if (savedProfile) {
+  setSelectedProfile(
+    JSON.parse(savedProfile)
+  );
+}
 
   //if (localStorage.getItem('backtestlab-unlocked') === 'true') {
   //setIsUnlocked(true);
@@ -149,6 +162,20 @@ const fetchTrades = async () => {
 
   setSavedTrades(data || []);
 };
+
+const fetchProfiles = async () => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*');
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  setProfiles(data || []);
+};
+
 const exportCSV = () => {
  const headers = [
   'Instrument',
@@ -659,6 +686,47 @@ if (!isUnlocked) {
   );
 }
 
+if (!selectedProfile) {
+  return (
+    <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl text-center">
+        <h1 className="text-5xl font-bold">
+          Who is trading?
+        </h1>
+
+        <p className="text-gray-400 mt-3">
+          Select your BacktestLab profile
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+          {profiles.map((profile: any) => (
+            <button
+              key={profile.id}
+              onClick={() => {
+  setSelectedProfile(profile);
+
+  sessionStorage.setItem(
+    'backtestlab-profile',
+    JSON.stringify(profile)
+  );
+}}
+              className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 hover:bg-white/[0.06] transition"
+            >
+              <div className="w-24 h-24 rounded-3xl bg-blue-600 mx-auto flex items-center justify-center text-4xl font-bold">
+                {profile.name.charAt(0)}
+              </div>
+
+              <h2 className="text-2xl font-semibold mt-5">
+                {profile.name}
+              </h2>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white flex">
       {/* Sidebar */}
@@ -669,7 +737,22 @@ if (!isUnlocked) {
           </h1>
           <p className="text-gray-400 text-sm mt-2">
             Professional Trading Analytics
+            
           </p>
+          <p className="text-gray-500 text-sm mt-2">
+  Profile: {selectedProfile?.name}
+</p>
+
+<button
+  onClick={() => {
+    setSelectedProfile(null);
+
+    localStorage.removeItem('backtestlab-profile');
+  }}
+  className="mt-4 w-full px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 text-sm"
+>
+  Switch Profile
+</button>
         </div>
 
         <nav className="mt-10 space-y-2">
@@ -1194,6 +1277,8 @@ setEditingTrade(null);
             
           </div>
         </div>
+
+
 
         <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
   <h3 className="text-xl font-semibold">
