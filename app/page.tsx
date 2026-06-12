@@ -105,11 +105,17 @@ const [activePage, setActivePage] = useState('Dashboard');
 const [profiles, setProfiles] = useState<any[]>([]);
 const [selectedProfile, setSelectedProfile] = useState<any>(null);
 
+const [strategyFolders, setStrategyFolders] = useState<any[]>([]);
+const [selectedStrategyFolder, setSelectedStrategyFolder] = useState<any>(null);
+
+const [strategyFolderView, setStrategyFolderView] = useState<any>(null);
+
 const [selectedTrade, setSelectedTrade] =
   useState<any>(null);
-  useEffect(() => {
+ useEffect(() => {
   if (selectedProfile) {
     fetchTrades();
+    fetchStrategyFolders();
   }
 }, [selectedProfile]);
 useEffect(() => {
@@ -182,6 +188,22 @@ const fetchProfiles = async () => {
   }
 
   setProfiles(data || []);
+};
+
+const fetchStrategyFolders = async () => {
+  if (!selectedProfile) return;
+
+  const { data, error } = await supabase
+    .from('strategy_folders')
+    .select('*')
+    .eq('profile_id', selectedProfile.id);
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  setStrategyFolders(data || []);
 };
 
 const exportCSV = () => {
@@ -772,12 +794,13 @@ if (!selectedProfile) {
 
         <nav className="mt-10 space-y-2">
   {[
-    'Dashboard',
-    'Trades',
-    'Analytics',
-    'Gallery',
-    'Settings',
-  ].map((item) => (
+  'Dashboard',
+  'Trades',
+  'Analytics',
+  'Gallery',
+  'Strategies',
+  'Settings',
+].map((item) => (
     <button
       key={item}
       onClick={() => setActivePage(item)}
@@ -806,6 +829,8 @@ if (!selectedProfile) {
       {/* Main */}
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         {/* Topbar */}
+
+        {activePage !== 'Strategies' && (
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           <div>
             <h2 className="text-5xl font-bold tracking-tight">
@@ -1294,9 +1319,10 @@ setEditingTrade(null);
             
           </div>
         </div>
+        )}
 
 
-
+        {activePage === 'Dashboard' && (
         <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
   <h3 className="text-xl font-semibold">
     Current View Summary
@@ -1364,7 +1390,12 @@ setEditingTrade(null);
     </div>
   </div>
 </div>
+)}
+
          {activePage === 'Dashboard' && (
+
+          
+
   <DashboardSection
     filteredTrades={filteredTrades}
     avgRR={avgRR}
@@ -1377,6 +1408,59 @@ setEditingTrade(null);
     bestEntryWindow={bestEntryWindow}
     chartData={chartData}
   />
+)}
+
+{activePage === 'Strategies' && (
+  <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+    <div className="flex items-center justify-between">
+      <h3 className="text-2xl font-semibold">
+        Strategy Folders
+      </h3>
+
+     <button
+  onClick={async () => {
+    const folderName = prompt('Enter strategy folder name');
+
+    if (!folderName) return;
+
+    const { error } = await supabase
+      .from('strategy_folders')
+      .insert([
+        {
+          name: folderName,
+          profile_id: selectedProfile.id,
+        },
+      ]);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    fetchStrategyFolders();
+  }}
+  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500"
+>
+  + Create Folder
+</button>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+      {strategyFolders.map((folder: any) => (
+        <div
+  key={folder.id}
+  onClick={() => setStrategyFolderView(folder)}
+  className="rounded-2xl border border-white/10 p-6 cursor-pointer hover:bg-white/[0.03]"
+>
+          <div className="text-4xl">📁</div>
+
+          <h4 className="text-xl font-semibold mt-4">
+            {folder.name}
+          </h4>
+        </div>
+      ))}
+    </div>
+  </div>
 )}
         
 
@@ -1516,7 +1600,8 @@ setEditingTrade(null);
               </tbody>
             </table>
           
-        
+        {activePage === 'Analytics' && (
+  <>
 
  <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
   <h3 className="text-2xl font-semibold">
@@ -1957,9 +2042,12 @@ setEditingTrade(null);
       </tbody>
     </table>
   </div>
-)}
+ )}
 
 </div>
+
+  </>
+)}
 
 {selectedScreenshot && (
   <Dialog
