@@ -716,6 +716,249 @@ export default function Page() {
     []
   );
 
+  const folderDayTable = Object.entries(
+  folderTrades.reduce((acc: any, trade: any) => {
+    if (!trade.day) return acc;
+
+    if (!acc[trade.day]) {
+      acc[trade.day] = {
+        trades: 0,
+        wins: 0,
+        netRR: 0,
+      };
+    }
+
+    acc[trade.day].trades++;
+
+    if (trade.result === 'WIN') {
+      acc[trade.day].wins++;
+    }
+
+    acc[trade.day].netRR += parseFloat(
+      trade.rr || '0'
+    );
+
+    return acc;
+  }, {})
+
+  
+  
+);
+
+const folderSessionTable = Object.entries(
+  folderTrades.reduce((acc: any, trade: any) => {
+    if (!trade.session) return acc;
+
+    if (!acc[trade.session]) {
+      acc[trade.session] = {
+        trades: 0,
+        wins: 0,
+        netRR: 0,
+      };
+    }
+
+    acc[trade.session].trades++;
+
+    if (trade.result === 'WIN') {
+      acc[trade.session].wins++;
+    }
+
+    acc[trade.session].netRR += parseFloat(
+      trade.rr || '0'
+    );
+
+    return acc;
+  }, {})
+);
+
+const folderTrendTable = Object.entries(
+  folderTrades.reduce((acc: any, trade: any) => {
+    if (!trade.trend) return acc;
+
+    if (!acc[trade.trend]) {
+      acc[trade.trend] = {
+        trades: 0,
+        wins: 0,
+        netRR: 0,
+      };
+    }
+
+    acc[trade.trend].trades++;
+
+    if (trade.result === 'WIN') {
+      acc[trade.trend].wins++;
+    }
+
+    acc[trade.trend].netRR += parseFloat(
+      trade.rr || '0'
+    );
+
+    return acc;
+  }, {})
+);
+
+const folderDayStats = folderTrades.reduce(
+  (acc: any, trade: any) => {
+    if (!trade.day) return acc;
+
+    if (!acc[trade.day]) {
+      acc[trade.day] = {
+        total: 0,
+        wins: 0,
+      };
+    }
+
+    acc[trade.day].total++;
+
+    if (trade.result === 'WIN') {
+      acc[trade.day].wins++;
+    }
+
+    return acc;
+  },
+  {}
+);
+
+const folderBestDay =
+  Object.keys(folderDayStats).length > 0
+    ? Object.entries(folderDayStats).sort(
+        (a: any, b: any) =>
+          b[1].wins / b[1].total -
+          a[1].wins / a[1].total
+      )[0][0]
+    : 'No Data';
+
+    const folderSessionStats = folderTrades.reduce(
+  (acc: any, trade: any) => {
+    if (!trade.session) return acc;
+
+    if (!acc[trade.session]) {
+      acc[trade.session] = {
+        total: 0,
+        wins: 0,
+      };
+    }
+
+    acc[trade.session].total++;
+
+    if (trade.result === 'WIN') {
+      acc[trade.session].wins++;
+    }
+
+    return acc;
+  },
+  {}
+);
+
+const folderBestSession =
+  Object.keys(folderSessionStats).length > 0
+    ? Object.entries(folderSessionStats).sort(
+        (a: any, b: any) =>
+          b[1].wins / b[1].total -
+          a[1].wins / a[1].total
+      )[0][0]
+    : 'No Data';
+
+    const folderTrendStats = folderTrades.reduce(
+  (acc: any, trade: any) => {
+    if (!trade.trend) return acc;
+
+    if (!acc[trade.trend]) {
+      acc[trade.trend] = {
+        total: 0,
+        wins: 0,
+      };
+    }
+
+    acc[trade.trend].total++;
+
+    if (trade.result === 'WIN') {
+      acc[trade.trend].wins++;
+    }
+
+    return acc;
+  },
+  {}
+);
+
+const folderBestTrend =
+  Object.keys(folderTrendStats).length > 0
+    ? Object.entries(folderTrendStats).sort(
+        (a: any, b: any) =>
+          b[1].wins / b[1].total -
+          a[1].wins / a[1].total
+      )[0][0]
+    : 'No Data';
+
+    const folderTimeTable = Object.entries(
+  folderTrades.reduce((acc: any, trade: any) => {
+    const slot = getTimeSlot(trade.entry_time);
+
+    if (!acc[slot]) {
+      acc[slot] = {
+        trades: 0,
+        wins: 0,
+      };
+    }
+
+    acc[slot].trades++;
+
+    if (trade.result === 'WIN') {
+      acc[slot].wins++;
+    }
+
+    return acc;
+  }, {})
+);
+
+const folderBestEntryWindow =
+  folderTimeTable.length > 0
+    ? folderTimeTable.sort(
+        (a: any, b: any) =>
+          b[1].wins / b[1].trades -
+          a[1].wins / a[1].trades
+      )[0][0]
+    : 'No Data';
+
+const folderMonthTable = Object.entries(
+  folderTrades.reduce((acc: any, trade: any) => {
+    if (!trade.trade_date) return acc;
+
+    const month = new Date(
+      trade.trade_date
+    ).toLocaleString('default', {
+      month: 'short',
+      year: 'numeric',
+    });
+
+    if (!acc[month]) {
+      acc[month] = {
+        trades: 0,
+        wins: 0,
+        netRR: 0,
+      };
+    }
+
+    acc[month].trades++;
+
+    if (trade.result === 'WIN') {
+      acc[month].wins++;
+    }
+
+    acc[month].netRR += parseFloat(
+      trade.rr || '0'
+    );
+
+    return acc;
+  }, {})
+);
+
+const folderScreenshotTrades =
+  folderTrades.filter(
+    (trade: any) => trade.screenshot_url
+  );
+
+
   if (!isUnlocked) {
     return (
       <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center p-6">
@@ -1222,12 +1465,39 @@ export default function Page() {
                       <label className="text-sm text-gray-400">
                         Strategy Folder
                       </label>
-
+                      
                       <select
                         value={selectedFolderForTrade}
-                        onChange={(e) =>
-                          setSelectedFolderForTrade(e.target.value)
-                        }
+                        onChange={async (e) => {
+  const value = e.target.value;
+
+  if (value === 'new') {
+    const folderName = prompt('Enter new folder name');
+    if (!folderName) return;
+
+    const { data, error } = await supabase
+      .from('strategy_folders')
+      .insert([
+        {
+          name: folderName,
+          profile_id: selectedProfile.id,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await fetchStrategyFolders();
+    setSelectedFolderForTrade(String(data.id));
+    return;
+  }
+
+  setSelectedFolderForTrade(value);
+}}
                         className="w-full mt-2 rounded-xl bg-[#0B0F19] border border-white/10 px-4 py-3"
                       >
                         <option value="">Select Folder</option>
@@ -1237,6 +1507,7 @@ export default function Page() {
                             {folder.name}
                           </option>
                         ))}
+                        <option value="new">➕ Create New Folder</option>
                       </select>
                     </div>
 
@@ -1517,7 +1788,54 @@ export default function Page() {
                       {folderTotalRR.toFixed(2)}R
                     </h3>
                   </div>
-                  <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+                  
+                </div>
+
+<div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-8">
+
+  <div className="rounded-2xl border border-white/10 bg-black/20 p-6">
+    <p className="text-gray-400 text-sm">
+      Best Day
+    </p>
+
+    <h3 className="text-2xl font-bold mt-3">
+      {folderBestDay}
+    </h3>
+  </div>
+
+  <div className="rounded-2xl border border-white/10 bg-black/20 p-6">
+    <p className="text-gray-400 text-sm">
+      Best Session
+    </p>
+
+    <h3 className="text-2xl font-bold mt-3">
+      {folderBestSession}
+    </h3>
+  </div>
+
+  <div className="rounded-2xl border border-white/10 bg-black/20 p-6">
+    <p className="text-gray-400 text-sm">
+      Best Trend
+    </p>
+
+    <h3 className="text-2xl font-bold mt-3">
+      {folderBestTrend}
+    </h3>
+  </div>
+
+  <div className="rounded-2xl border border-white/10 bg-black/20 p-6">
+    <p className="text-gray-400 text-sm">
+      Best Entry Window
+    </p>
+
+    <h3 className="text-2xl font-bold mt-3">
+      {folderBestEntryWindow}
+    </h3>
+  </div>
+
+</div>
+
+              <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
                     <h3 className="text-2xl font-semibold">
                       Equity Curve
                     </h3>
@@ -1542,7 +1860,278 @@ export default function Page() {
                     </div>
                   </div>
 
-                </div>
+
+                  
+                 <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Day Analytics
+  </h3>
+
+  <div className="overflow-x-auto mt-6">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="text-left text-gray-400 border-b border-white/10">
+          <th className="pb-4 font-medium">Day</th>
+          <th className="pb-4 font-medium">Trades</th>
+          <th className="pb-4 font-medium">Win Rate</th>
+          <th className="pb-4 font-medium">Net RR</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {folderDayTable.map(([day, stats]: any) => (
+          <tr
+            key={day}
+            className="border-b border-white/5"
+          >
+            <td className="py-4">{day}</td>
+
+            <td className="py-4">
+              {stats.trades}
+            </td>
+
+            <td className="py-4">
+              {Math.round(
+                (stats.wins / stats.trades) * 100
+              )}
+              %
+            </td>
+
+            <td className="py-4">
+              {stats.netRR.toFixed(2)}R
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Session Analytics
+  </h3>
+
+  <div className="overflow-x-auto mt-6">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="text-left text-gray-400 border-b border-white/10">
+          <th className="pb-4 font-medium">Session</th>
+          <th className="pb-4 font-medium">Trades</th>
+          <th className="pb-4 font-medium">Win Rate</th>
+          <th className="pb-4 font-medium">Net RR</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {folderSessionTable.map(([session, stats]: any) => (
+          <tr key={session} className="border-b border-white/5">
+            <td className="py-4">{session}</td>
+            <td className="py-4">{stats.trades}</td>
+            <td className="py-4">
+              {Math.round((stats.wins / stats.trades) * 100)}%
+            </td>
+            <td className="py-4">{stats.netRR.toFixed(2)}R</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Trend Analytics
+  </h3>
+
+  <div className="overflow-x-auto mt-6">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="text-left text-gray-400 border-b border-white/10">
+          <th className="pb-4 font-medium">Trend</th>
+          <th className="pb-4 font-medium">Trades</th>
+          <th className="pb-4 font-medium">Win Rate</th>
+          <th className="pb-4 font-medium">Net RR</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {folderTrendTable.map(([trend, stats]: any) => (
+          <tr key={trend} className="border-b border-white/5">
+            <td className="py-4">{trend}</td>
+            <td className="py-4">{stats.trades}</td>
+            <td className="py-4">
+              {Math.round((stats.wins / stats.trades) * 100)}%
+            </td>
+            <td className="py-4">{stats.netRR.toFixed(2)}R</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Time-wise Analytics
+  </h3>
+
+  <div className="overflow-x-auto mt-6">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="text-left text-gray-400 border-b border-white/10">
+          <th className="pb-4">Time Slot</th>
+          <th className="pb-4">Trades</th>
+          <th className="pb-4">Win Rate</th>
+          <th className="pb-4">Net RR</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {folderTimeTable.map(([slot, stats]: any) => (
+          <tr key={slot} className="border-b border-white/5">
+            <td className="py-4">{slot}</td>
+            <td className="py-4">{stats.trades}</td>
+            <td className="py-4">
+              {Math.round((stats.wins / stats.trades) * 100)}%
+            </td>
+            <td className="py-4">{(stats.netRR || 0).toFixed(2)}R</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Monthly Analytics
+  </h3>
+
+  <div className="overflow-x-auto mt-6">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="text-left text-gray-400 border-b border-white/10">
+          <th className="pb-4">Month</th>
+          <th className="pb-4">Trades</th>
+          <th className="pb-4">Win Rate</th>
+          <th className="pb-4">Net RR</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {folderMonthTable.map(([month, stats]: any) => (
+          <tr key={month} className="border-b border-white/5">
+            <td className="py-4">{month}</td>
+            <td className="py-4">{stats.trades}</td>
+            <td className="py-4">
+              {Math.round((stats.wins / stats.trades) * 100)}%
+            </td>
+            <td className="py-4">{(stats.netRR || 0).toFixed(2)}R</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Screenshot Gallery
+  </h3>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6">
+    {folderScreenshotTrades.map((trade: any) => (
+      <div
+        key={trade.id}
+        className="rounded-2xl border border-white/10 bg-black/20 overflow-hidden"
+      >
+        <div
+          onClick={() => setSelectedScreenshot(trade)}
+          className="cursor-pointer"
+        >
+          <img
+            src={trade.screenshot_url}
+            alt="Trade Screenshot"
+            className="w-full h-48 object-cover hover:scale-105 transition"
+          />
+        </div>
+
+        <div className="p-4">
+          <h4 className="font-semibold">
+            {trade.instrument || 'No Instrument'}
+          </h4>
+
+          <p className="text-sm text-gray-400 mt-1">
+            {trade.strategy || 'No Strategy'}
+          </p>
+
+          <p className="text-sm text-gray-500 mt-2">
+            {trade.trade_date} • {trade.entry_time}
+          </p>
+
+          <p className="text-sm text-gray-300 mt-2">
+            RR: {trade.rr}R • {trade.result}
+          </p>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+
+
+<div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+  <h3 className="text-2xl font-semibold">
+    Recent Trades
+  </h3>
+
+  <div className="overflow-x-auto mt-6">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="text-left text-gray-400 border-b border-white/10">
+          <th className="pb-4">Instrument</th>
+          <th className="pb-4">Strategy</th>
+          <th className="pb-4">Result</th>
+          <th className="pb-4">RR</th>
+          <th className="pb-4">Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {folderTrades.map((trade: any) => (
+          <tr
+            key={trade.id}
+            className="border-b border-white/5"
+          >
+            <td className="py-4">
+              {trade.instrument}
+            </td>
+
+            <td className="py-4">
+              {trade.strategy}
+            </td>
+
+            <td className="py-4">
+              {trade.result}
+            </td>
+
+            <td className="py-4">
+              {trade.rr}R
+            </td>
+
+            <td className="py-4">
+              {trade.trade_date}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
               </div>
             ) : (
               <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
