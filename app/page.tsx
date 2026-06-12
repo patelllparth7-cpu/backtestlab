@@ -107,6 +107,11 @@ const [selectedProfile, setSelectedProfile] = useState<any>(null);
 
 const [selectedTrade, setSelectedTrade] =
   useState<any>(null);
+  useEffect(() => {
+  if (selectedProfile) {
+    fetchTrades();
+  }
+}, [selectedProfile]);
 useEffect(() => {
   fetchTrades();
   fetchProfiles();
@@ -151,9 +156,12 @@ if (
 }, []);
 
 const fetchTrades = async () => {
-  const { data, error } = await supabase
-    .from('trades')
-    .select('*');
+  if (!selectedProfile) return;
+
+const { data, error } = await supabase
+  .from('trades')
+  .select('*')
+  .eq('profile_id', selectedProfile.id);
 
   if (error) {
     console.log(error);
@@ -702,14 +710,21 @@ if (!selectedProfile) {
           {profiles.map((profile: any) => (
             <button
               key={profile.id}
-              onClick={() => {
+             onClick={() => {
   setSelectedProfile(profile);
 
-  sessionStorage.setItem(
+  localStorage.setItem(
     'backtestlab-profile',
     JSON.stringify(profile)
   );
+
+
+
+  fetchTrades();
 }}
+
+
+
               className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 hover:bg-white/[0.06] transition"
             >
               <div className="w-24 h-24 rounded-3xl bg-blue-600 mx-auto flex items-center justify-center text-4xl font-bold">
@@ -1228,6 +1243,8 @@ if (screenshotFile) {
   
   screenshot_url: screenshotUrl,
   trend: tradeData.trend,
+
+  profile_id: selectedProfile.id,
 };
 
   const { error } = editingTrade
